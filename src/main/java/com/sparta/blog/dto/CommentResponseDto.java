@@ -11,12 +11,11 @@ import java.util.Date;
 @Getter
 @Setter
 public class CommentResponseDto {
-    private long id;
+    private Long id;
     private String title;
     private String content;
     private String author;
-    private String createdAt;
-    private String modifiedAt;
+    private String writeAt;
 
     @JsonIgnore
     Date today = new Date();
@@ -29,7 +28,14 @@ public class CommentResponseDto {
         this.title = comment.getTitle();;
         this.content = comment.getContent();
         this.author = comment.getAuthor();
-        this.createdAt = comment.getCreatedAt();
-        this.modifiedAt = comment.getModifiedAt();
+        this.writeAt = comment.getWriteAt();
+    }
+
+    public CommentResponseDto(Long id, String title, String content, String author, String writeAt) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.writeAt = writeAt;
     }
 }
