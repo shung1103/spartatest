@@ -1,6 +1,9 @@
 package com.sparta.blog.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,13 +15,9 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Timestamped {
-    @CreatedDate
-    @Column(updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime createdAt;
 
+    @CreatedDate
     @LastModifiedDate
-    @Column
     @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime modifiedAt;
+    private LocalDateTime writtenAt;
 }

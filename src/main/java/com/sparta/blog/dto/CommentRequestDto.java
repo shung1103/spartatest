@@ -4,8 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class CommentRequestDto {
-    private String password;
     private String title;
-    private String contents;
     private String username;
+    private String contents;
 }

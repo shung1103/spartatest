@@ -32,7 +32,7 @@ public class CommentService {
 
     public List<CommentResponseDto> getComments() {
         // DB 조회
-        return commentRepository.findAllByOrderByModifiedAtDesc().stream().map(CommentResponseDto::new).toList();
+        return commentRepository.findAllByOrderByWrittenAtDesc().stream().map(CommentResponseDto::new).toList();
     }
 
     public Comment getCommentsById(Long id) {
@@ -40,26 +40,26 @@ public class CommentService {
     }
 
     public List<CommentResponseDto> getCommentsByKeyword(String keyword) {
-        return commentRepository.findAllByContentsContainsOrderByModifiedAtDesc(keyword).stream().map(CommentResponseDto::new).toList();
+        return commentRepository.findAllByContentsContainsOrderByWrittenAtDesc(keyword).stream().map(CommentResponseDto::new).toList();
     }
 
     @Transactional
-    public Long updateComment(Long id, CommentRequestDto requestDto) {
+    public CommentRequestDto updateComment(Long id, CommentRequestDto requestDto) {
         // 해당 메모가 DB에 존재하는지 확인
         Comment comment = findComment(id);
         // comment 내용 수정
         comment.update(requestDto);
 
-        return id;
+        return requestDto;
     }
 
-    public Long deleteComment(Long id) {
+    public String deleteComment(Long id) {
         // 해당 메모가 DB에 존재하는지 확인
         Comment comment = findComment(id);
         // comment 삭제
         commentRepository.delete(comment);
 
-        return id;
+        return "게시글을 삭제하는 데 성공하였습니다.";
     }
 
     private Comment findComment(Long id) {

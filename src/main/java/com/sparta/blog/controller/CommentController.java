@@ -28,7 +28,7 @@ public class CommentController {
     }
 
     @GetMapping("/comments/{id}")
-    public Comment getCommentsById(Long id) {
+    public Comment getCommentsById(@PathVariable Long id) {
         return commentService.getCommentsById(id);
     }
 
@@ -38,12 +38,12 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{id}")
-    public Long updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto) {
+    public CommentRequestDto updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto) {
         return commentService.updateComment(id, requestDto);
     }
 
-    @DeleteMapping("/comments/{id}/{password}")
-    public Long deleteComment(@PathVariable Long id) {
+    @DeleteMapping("/comments/{id}")
+    public String deleteComment(@PathVariable Long id) {
         return commentService.deleteComment(id);
     }
 }
