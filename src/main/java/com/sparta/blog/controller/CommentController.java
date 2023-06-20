@@ -28,30 +28,22 @@ public class CommentController {
     }
 
     @GetMapping("/comments/{id}")
-    public Comment getOneComment(@PathVariable Long id) {
-        return commentService.getOneComment(id);
+    public Comment getCommentsById(Long id) {
+        return commentService.getCommentsById(id);
     }
 
-    @GetMapping("/comments/forDeveloperOnly/{id}")
-    public Comment getOnePassword(@PathVariable Long id) {
-        return commentService.getOnePassword(id);
+    @GetMapping("/comments/contents")
+    public List<CommentResponseDto> getCommentsByKeyword(String keyword) {
+        return commentService.getCommentsByKeyword(keyword);
     }
 
     @PutMapping("/comments/{id}")
-    public Comment updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto) {
-        if (requestDto.getPassword().equals(getOnePassword(id).getPassword())) {
-            return commentService.updateComment(id, requestDto);
-        } else {
-            throw new IllegalArgumentException("잘못 된 비밀번호입니다.");
-        }
+    public Long updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto) {
+        return commentService.updateComment(id, requestDto);
     }
 
     @DeleteMapping("/comments/{id}/{password}")
-    public String deleteComment(@PathVariable Long id, @PathVariable String password) {
-        if (password.equals(getOnePassword(id).getPassword())) {
-            return commentService.deleteComment(id);
-        } else {
-            throw new IllegalArgumentException("잘못 된 비밀번호입니다.");
-        }
+    public Long deleteComment(@PathVariable Long id) {
+        return commentService.deleteComment(id);
     }
 }

@@ -1,36 +1,40 @@
 package com.sparta.blog.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sparta.blog.dto.CommentRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+@Entity
 @Getter
 @Setter
+@Table(name = "blog")
 @NoArgsConstructor
-public class Comment {
+public class Comment extends Timestamped{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(name = "password", nullable = false)
     private String password;
+    @Column(name = "title", nullable = false)
     private String title;
-    private String content;
-    private String author;
-    private String writeAt;
-
-    @JsonIgnore
-    Date today = new Date();
-
-    @JsonIgnore
-    SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd aa hh:mm:ss");
+    @Column(name = "contents", nullable = false, length = 500)
+    private String contents;
+    @Column(name = "username", nullable = false)
+    private String username;
 
     public Comment(CommentRequestDto requestDto) {
-        this.writeAt = simple.format(today);
         this.password = requestDto.getPassword();
         this.title = requestDto.getTitle();
-        this.content = requestDto.getContent();
-        this.author = requestDto.getAuthor();
+        this.contents = requestDto.getContents();
+        this.username = requestDto.getUsername();
+    }
+
+    public void update(CommentRequestDto requestDto) {
+        this.password = requestDto.getPassword();
+        this.title = requestDto.getTitle();
+        this.contents = requestDto.getContents();
+        this.username = requestDto.getUsername();
     }
 }

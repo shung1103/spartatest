@@ -4,11 +4,12 @@ import com.sparta.blog.dto.CommentRequestDto;
 import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.entity.Comment;
 import com.sparta.blog.repository.CommentRepository;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Component
+@Service
 public class CommentService {
     // 멤버 변수 선언
     private final CommentRepository commentRepository;
@@ -31,42 +32,37 @@ public class CommentService {
 
     public List<CommentResponseDto> getComments() {
         // DB 조회
-        return commentRepository.findAll();
+        return commentRepository.findAllByOrderByModifiedAtDesc().stream().map(CommentResponseDto::new).toList();
     }
 
-    public Comment getOneComment(Long id) {
-        // DB 조회
-        return commentRepository.findById(id);
+    public Comment getCommentsById(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 게시글은 존재하지 않습니다."));
     }
 
-    public Comment getOnePassword(Long id) {
-        // DB 조회
-        return commentRepository.findByPass(id);
+    public List<CommentResponseDto> getCommentsByKeyword(String keyword) {
+        return commentRepository.findAllByContentsContainsOrderByModifiedAtDesc(keyword).stream().map(CommentResponseDto::new).toList();
     }
 
-    public Comment updateComment(Long id, CommentRequestDto requestDto) {
+    @Transactional
+    public Long updateComment(Long id, CommentRequestDto requestDto) {
         // 해당 메모가 DB에 존재하는지 확인
-        Comment comment = commentRepository.findById(id);
-        if (comment != null) {
-            // comment 내용 수정
-            commentRepository.update(id, requestDto);
+        Comment comment = findComment(id);
+        // comment 내용 수정
+        comment.update(requestDto);
 
-            return commentRepository.findById(id);
-        } else {
-            throw new IllegalArgumentException("선택한 댓글은 존재하지 않습니다.");
-        }
+        return id;
     }
 
-    public String deleteComment(Long id) {
+    public Long deleteComment(Long id) {
         // 해당 메모가 DB에 존재하는지 확인
-        Comment comment = commentRepository.findById(id);
-        if (comment != null) {
-            // comment 삭제
-            commentRepository.delete(id);
+        Comment comment = findComment(id);
+        // comment 삭제
+        commentRepository.delete(comment);
 
-            return "선택한 댓글을 삭제하였습니다.";
-        } else {
-            throw new IllegalArgumentException("선택한 댓글은 존재하지 않습니다.");
-        }
+        return id;
+    }
+
+    private Comment findComment(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 게시글은 존재하지 않습니다."));
     }
 }
