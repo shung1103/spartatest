@@ -9,8 +9,8 @@ import jakarta.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "blog")
 @NoArgsConstructor
+@Table(name = "blog")
 public class Comment extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
