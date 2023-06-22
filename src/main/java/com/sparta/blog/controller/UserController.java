@@ -42,7 +42,6 @@ public class UserController {
             return "redirect:/api/user/login-page?error";
         }
 
-//        return "redirect:/";
         return "blog";
     }
 }
