@@ -3,12 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="preconnect" href="https://fonts.gstatic.com">
 
     <link rel="stylesheet" href="/css/style.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+            integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script src="/js/basic.js"></script>
 
@@ -149,12 +151,28 @@
 
         }
 
-        .card .metadata .title {
+        .card .metadata .username {
             margin-left: 20px;
         }
 
-        .card .metadata .username {
-            margin-left: 20px;
+        .title {
+            padding: 0px 23px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .title div.edit {
+            display: none;
+        }
+
+        .title textarea.te-edit {
+            border-right: none;
+            border-top: none;
+            border-left: none;
+            resize: none;
+            border-bottom: 1px solid #212529;
+            width: 100%;
+            font-family: 'Spoqa Han Sans';
         }
 
         .contents {
@@ -180,6 +198,15 @@
         .footer {
             position: relative;
             height: 40px;
+        }
+
+        .footer img.icon-get {
+            cursor: pointer;
+            position: absolute;
+            bottom: 14px;
+            right: 89px;
+            width: 18px;
+            height: 18px;
         }
 
         .footer img.icon-start-edit {
@@ -245,15 +272,19 @@
         // 숨길 버튼을 숨기고, 나타낼 버튼을 나타냅니다.
         function editPost(id) {
             showEdits(id);
+            let title = $(`#${id}-title`).text().trim();
+            $(`#${id}-texttitle`).val(title);
             let contents = $(`#${id}-contents`).text().trim();
             $(`#${id}-textarea`).val(contents);
         }
 
         function showEdits(id) {
+            $(`#${id}-edittitle`).show();
             $(`#${id}-editarea`).show();
             $(`#${id}-submit`).show();
             $(`#${id}-delete`).show();
 
+            $(`#${id}-title`).hide();
             $(`#${id}-contents`).hide();
             $(`#${id}-edit`).hide();
         }
@@ -285,6 +316,22 @@
             })
         }
 
+        // 선택한 게시글 하나를 불러와 보여줍니다.
+        function getOne(id) {
+            $.ajax({
+                type: 'GET',
+                url: '/blog/comments/${id}',
+                success: function (response) {
+                    let id = response['id'];
+                    let title = response['title'];
+                    let username = response['username'];
+                    let contents = response['contents'];
+                    let modifiedAt = response['writtenAt'];
+                    addHTML(id, username, title, contents, modifiedAt);
+                }
+            })
+        }
+
         // 게시글 하나를 HTML로 만들어서 body 태그 내 원하는 곳에 붙입니다.
         function addHTML(id, username, title, contents, writtenAt) {
             // 1. HTML 태그를 만듭니다.
@@ -294,14 +341,19 @@
                     <div class="date">
                         ${writtenAt}
                     </div>
-                    <div id="${id}-title" class="title">
-                        ${title}
-                    </div>
                     <div id="${id}-username" class="username">
                         ${username}
                     </div>
                 </div>
                 <!-- contents 조회/수정 영역-->
+                <div class="title">
+                    <div id="${id}-title" class="text">
+                        ${title}
+                    </div>
+                    <div id="${id}-edittitle" class="edit">
+                        <textarea id="${id}-texttitle" class="te-edit" name="" id="" cols="30" rows="5"></textarea>
+                    </div>
+                </div>
                 <div class="contents">
                     <div id="${id}-contents" class="text">
                         ${contents}
@@ -312,6 +364,7 @@
                 </div>
                 <!-- 버튼 영역-->
                 <div class="footer">
+                    <img id="${id}-get" class="icon-get" src="images/get.png" alt="" onclick="getOne('${id}')">
                     <img id="${id}-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editPost('${id}')">
                     <img id="${id}-delete" class="icon-delete" src="images/delete.png" alt="" onclick="deleteOne('${id}')">
                     <img id="${id}-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('${id}')">
@@ -354,10 +407,10 @@
 
         // 게시글을 수정합니다.
         function submitEdit(id) {
-            // 1. 작성 대상 게시글의 username과 contents 를 확인합니다.
-            let title = $(`#${id}-title`).val().trim();
-            let username = $(`#${id}-username`).text().trim();
+            // 1. 작성 대상 게시글의 title과 contents 를 확인합니다.
+            let title = $(`#${id}-texttitle`).val().trim();
             let contents = $(`#${id}-textarea`).val().trim();
+            let username = $(`#${id}-username`).val().trim();
 
             // 2. 작성한 게시글이 올바른지 isValidContents 함수를 통해 확인합니다.
             if (isValidContents(contents) == false) {
@@ -382,6 +435,8 @@
 
         // 게시글을 삭제합니다.
         function deleteOne(id) {
+            let username = $(`#${id}-username`).val().trim();
+            let data = {'username': username};
             // 1. DELETE /blog/comments/{id} 에 요청해서 메모를 삭제합니다.
             $.ajax({
                 type: "DELETE",
@@ -430,17 +485,16 @@
                 <div class="date">
                     October 10, 2020
                 </div>
-                <div class="title">
-                    untitled
-                </div>
                 <div class="username">
                     anonymous
                 </div>
             </div>
             <!-- contents 조회/수정 영역-->
-            <div class="contents"></div>
+            <div class="title">untitled</div>
+            <div class="contents">nothing</div>
             <!-- 버튼 영역-->
             <div class="footer">
+                <img id="1-get" class="icon-get" src="images/get.png" alt="" onclick="getOne('1')">
                 <img id="1-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editPost('1')">
                 <img id="1-delete" class="icon-delete" src="images/delete.png" alt="" onclick="deleteOne('1')">
                 <img id="1-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('1')">

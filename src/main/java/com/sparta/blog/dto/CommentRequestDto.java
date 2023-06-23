@@ -1,10 +1,15 @@
 package com.sparta.blog.dto;
 
+import com.sparta.blog.entity.User;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
+@RequiredArgsConstructor
 public class CommentRequestDto {
     private String title;
-    private String username;
     private String contents;
+    private User user;
 }
