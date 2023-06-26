@@ -3,6 +3,7 @@ package com.sparta.blog.service;
 import com.sparta.blog.dto.CommentRequestDto;
 import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.entity.Comment;
+import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.repository.CommentRepository;
 import com.sparta.blog.security.UserDetailsImpl;
 import org.springframework.stereotype.Service;
@@ -48,11 +49,17 @@ public class CommentService {
     public CommentRequestDto updateComment(Long id, CommentRequestDto requestDto, UserDetailsImpl userDetails) {
         // 해당 메모가 DB에 존재하는지 확인
         Comment comment = findComment(id);
-        if (comment.getUsername().equals(userDetails.getUsername())) {
+        // 권한 admin 확인
+        if (userDetails.getRole() == UserRoleEnum.ADMIN) {
             // comment 내용 수정
             comment.update(requestDto);
         } else {
-            throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
+            if (comment.getUsername().equals(userDetails.getUsername())) {
+                // comment 내용 수정
+                comment.update(requestDto);
+            } else {
+                throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
+            }
         }
 
         return requestDto;
@@ -61,13 +68,19 @@ public class CommentService {
     public String deleteComment(Long id, UserDetailsImpl userDetails) {
         // 해당 메모가 DB에 존재하는지 확인
         Comment comment = findComment(id);
-        if (comment.getUsername().equals(userDetails.getUsername())) {
-            // comment 삭제
+        // 권한 admin 확인
+        if (userDetails.getRole() == UserRoleEnum.ADMIN) {
             commentRepository.delete(comment);
             return "게시글을 삭제하는 데 성공하였습니다.";
         } else {
+            if (comment.getUsername().equals(userDetails.getUsername())) {
+                // comment 삭제
+                commentRepository.delete(comment);
+                return "게시글을 삭제하는 데 성공하였습니다.";
+            } else {
 //            throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
-            return "redirect:/blog";
+                return "redirect:/blog";
+            }
         }
     }
 
