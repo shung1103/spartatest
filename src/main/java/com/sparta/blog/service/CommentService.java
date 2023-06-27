@@ -25,6 +25,19 @@ public class CommentService {
 
     private final JwtUtil jwtUtil;
 
+    public List<CommentResponseDto> getComments() {
+        // DB 조회
+        return commentRepository.findAllByOrderByWrittenAtDesc().stream().map(CommentResponseDto::new).toList();
+    }
+
+    public Comment getCommentsById(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 게시글은 존재하지 않습니다."));
+    }
+
+    public List<CommentResponseDto> getCommentsByKeyword(String keyword) {
+        return commentRepository.findAllByContentsContainsOrderByWrittenAtDesc(keyword).stream().map(CommentResponseDto::new).toList();
+    }
+
     public CommentResponseDto createComment(CommentRequestDto requestDto, UserDetailsImpl userDetails, HttpServletRequest req) {
         String tokenValue = jwtUtil.getTokenFromRequest(req);
         tokenValue = jwtUtil.substringToken(tokenValue);
@@ -41,19 +54,6 @@ public class CommentService {
 
             return commentResponseDto;
         }
-    }
-
-    public List<CommentResponseDto> getComments() {
-        // DB 조회
-        return commentRepository.findAllByOrderByWrittenAtDesc().stream().map(CommentResponseDto::new).toList();
-    }
-
-    public Comment getCommentsById(Long id) {
-        return commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 게시글은 존재하지 않습니다."));
-    }
-
-    public List<CommentResponseDto> getCommentsByKeyword(String keyword) {
-        return commentRepository.findAllByContentsContainsOrderByWrittenAtDesc(keyword).stream().map(CommentResponseDto::new).toList();
     }
 
     @Transactional

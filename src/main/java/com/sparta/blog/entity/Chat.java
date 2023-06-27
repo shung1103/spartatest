@@ -36,13 +36,15 @@ public class Chat extends Timestamped{
     private Comment comment;
 
     public Chat(ChatRequestDto requestDto, UserDetailsImpl userDetails, Comment comment) {
-        User user =  userDetails.getUser();
+        this.user =  userDetails.getUser();
         this.comment = comment;
         this.username = user.getUsername();
         this.contents = requestDto.getContents();
     }
 
-    public void update(ChatRequestDto requestDto) {
+    public void update(ChatRequestDto requestDto, Comment comment, UserDetailsImpl userDetails) {
         this.contents = requestDto.getContents();
+        this.comment = comment;
+        this.user = userDetails.getUser();
     }
 }
