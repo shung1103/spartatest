@@ -2,7 +2,6 @@ package com.sparta.blog.service;
 
 import com.sparta.blog.dto.ChatRequestDto;
 import com.sparta.blog.dto.ChatResponseDto;
-import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.dto.ResponseDto;
 import com.sparta.blog.entity.Chat;
 import com.sparta.blog.entity.Comment;
