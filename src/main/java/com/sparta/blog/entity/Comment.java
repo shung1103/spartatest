@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -16,6 +19,7 @@ import jakarta.persistence.*;
 public class Comment extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "COMMENT_ID")
     private long id;
     @Column(name = "title", nullable = false)
     private String title;
@@ -29,15 +33,22 @@ public class Comment extends Timestamped{
     @JsonIgnore
     private User user;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<Chat> chatList = new ArrayList<>();
+
     public Comment(CommentRequestDto requestDto, UserDetailsImpl userDetails) {
         User user =  userDetails.getUser();
         this.username = user.getUsername();
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
+        this.chatList = requestDto.getChatList();
     }
 
+    // 게시글 수정 메서드
     public void update(CommentRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
     }
+
+    public void addChat(Chat chat) { this.chatList.add(chat); }
 }

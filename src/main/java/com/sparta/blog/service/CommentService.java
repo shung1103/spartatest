@@ -4,32 +4,43 @@ import com.sparta.blog.dto.CommentRequestDto;
 import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.entity.Comment;
 import com.sparta.blog.entity.UserRoleEnum;
+import com.sparta.blog.jwt.JwtUtil;
 import com.sparta.blog.repository.CommentRepository;
 import com.sparta.blog.security.UserDetailsImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class CommentService {
     // 멤버 변수 선언
     private final CommentRepository commentRepository;
     // 생성자: commentService(JdbcTemplate jdbcTemplate)가 생성될 때 호출됨
-    public CommentService(CommentRepository commentRepository) {
-        // 멤버 변수 생성
-        this.commentRepository = commentRepository;
-    }
 
-    public CommentResponseDto createComment(CommentRequestDto requestDto, UserDetailsImpl userDetails) {
-        // RequestDto -> Entity
-        Comment comment = new Comment(requestDto, userDetails);
-        // DB 저장
-        Comment saveComment = commentRepository.save(comment);
-        // Entity -> ResponseDto
-        CommentResponseDto commentResponseDto = new CommentResponseDto(saveComment);
+    private final JwtUtil jwtUtil;
 
-        return commentResponseDto;
+    public CommentResponseDto createComment(CommentRequestDto requestDto, UserDetailsImpl userDetails, HttpServletRequest req) {
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        tokenValue = jwtUtil.substringToken(tokenValue);
+        if (!jwtUtil.validateToken(tokenValue)) {
+            log.error("Token Error");
+            return null;
+        } else {
+            // RequestDto -> Entity
+            Comment comment = new Comment(requestDto, userDetails);
+            // DB 저장
+            Comment saveComment = commentRepository.save(comment);
+            // Entity -> ResponseDto
+            CommentResponseDto commentResponseDto = new CommentResponseDto(saveComment);
+
+            return commentResponseDto;
+        }
     }
 
     public List<CommentResponseDto> getComments() {
@@ -46,40 +57,54 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentRequestDto updateComment(Long id, CommentRequestDto requestDto, UserDetailsImpl userDetails) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Comment comment = findComment(id);
-        // 권한 admin 확인
-        if (userDetails.getRole() == UserRoleEnum.ADMIN) {
-            // comment 내용 수정
-            comment.update(requestDto);
+    public CommentRequestDto updateComment(Long id, CommentRequestDto requestDto, UserDetailsImpl userDetails, HttpServletRequest req) {
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        tokenValue = jwtUtil.substringToken(tokenValue);
+        if (!jwtUtil.validateToken(tokenValue)) {
+            log.error("Token Error");
+            return null;
         } else {
-            if (comment.getUsername().equals(userDetails.getUsername())) {
+            // 해당 메모가 DB에 존재하는지 확인
+            Comment comment = findComment(id);
+            // 권한 admin 확인
+            if (userDetails.getRole() == UserRoleEnum.ADMIN) {
                 // comment 내용 수정
                 comment.update(requestDto);
             } else {
-                throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
+                if (comment.getUsername().equals(userDetails.getUsername())) {
+                    // comment 내용 수정
+                    comment.update(requestDto);
+                } else {
+                    throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
+                }
             }
-        }
 
-        return requestDto;
+            return requestDto;
+        }
     }
 
-    public String deleteComment(Long id, UserDetailsImpl userDetails) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Comment comment = findComment(id);
-        // 권한 admin 확인
-        if (userDetails.getRole() == UserRoleEnum.ADMIN) {
-            commentRepository.delete(comment);
-            return "게시글을 삭제하는 데 성공하였습니다.";
+    public String deleteComment(Long id, UserDetailsImpl userDetails, HttpServletRequest req) {
+        String tokenValue = jwtUtil.getTokenFromRequest(req);
+        tokenValue = jwtUtil.substringToken(tokenValue);
+        if (!jwtUtil.validateToken(tokenValue)) {
+            log.error("Token Error");
+            return null;
         } else {
-            if (comment.getUsername().equals(userDetails.getUsername())) {
-                // comment 삭제
+            // 해당 메모가 DB에 존재하는지 확인
+            Comment comment = findComment(id);
+            // 권한 admin 확인
+            if (userDetails.getRole() == UserRoleEnum.ADMIN) {
                 commentRepository.delete(comment);
                 return "게시글을 삭제하는 데 성공하였습니다.";
             } else {
+                if (comment.getUsername().equals(userDetails.getUsername())) {
+                    // comment 삭제
+                    commentRepository.delete(comment);
+                    return "게시글을 삭제하는 데 성공하였습니다.";
+                } else {
 //            throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다.");
-                return "redirect:/blog";
+                    return "redirect:/blog";
+                }
             }
         }
     }
