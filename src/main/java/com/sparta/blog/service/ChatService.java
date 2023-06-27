@@ -1,6 +1,8 @@
 package com.sparta.blog.service;
 
 import com.sparta.blog.dto.ChatRequestDto;
+import com.sparta.blog.dto.ChatResponseDto;
+import com.sparta.blog.dto.CommentResponseDto;
 import com.sparta.blog.dto.ResponseDto;
 import com.sparta.blog.entity.Chat;
 import com.sparta.blog.entity.Comment;
@@ -8,7 +10,6 @@ import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.jwt.JwtUtil;
 import com.sparta.blog.repository.ChatRepository;
 import com.sparta.blog.repository.CommentRepository;
-import com.sparta.blog.repository.UserRepository;
 import com.sparta.blog.security.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -26,20 +27,12 @@ import java.util.Optional;
 @Slf4j
 public class ChatService {
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public ResponseEntity<?> getAllChat(Long commentsId) {
-        Optional<Comment> foundComments = commentRepository.findById(commentsId);
-        if (foundComments.isPresent()) {
-            List<Chat> chatList = foundComments.get().getChatList();
-            return new ResponseEntity<>(ResponseDto.success(chatList), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(ResponseDto.fail("NULL_POST_ID", "해당 게시글은 존재하지 않는 게시글입니다."),
-                    HttpStatus.NOT_FOUND);
-        }
+    public List<ChatResponseDto> getAllChat(Long commentsId) {
+        return chatRepository.findByIdOrderByWrittenAtDesc(commentsId).stream().map(ChatResponseDto::new).toList();
     }
 
     @Transactional
@@ -135,9 +128,5 @@ public class ChatService {
                         HttpStatus.NOT_FOUND);
             }
         }
-    }
-
-    private Chat findChat(Long id) {
-        return chatRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("선택한 게시글은 존재하지 않습니다."));
     }
 }

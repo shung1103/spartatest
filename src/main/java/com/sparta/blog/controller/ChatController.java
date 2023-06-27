@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/blog/comments/{id}")
@@ -18,7 +20,7 @@ public class ChatController {
 
     // 전체 댓글 목록 조회
     @GetMapping("/chat")
-    public ResponseEntity<?> getChat(@PathVariable(name = "id") Long commentsId) {
+    public List<ChatResponseDto> getAllChat(@PathVariable(name = "id") Long commentsId) {
         return chatService.getAllChat(commentsId);
     }
 
