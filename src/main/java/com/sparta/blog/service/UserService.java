@@ -29,16 +29,10 @@ public class UserService {
         String password = passwordEncoder.encode(requestDto.getPassword());
 
         // 아이디 입력 제한 확인
-        if (username.length() < 4 || username.length() > 10) {
-            throw new IllegalArgumentException("아이디는 최소 4자 이상, 10자 이하로 해주세요.");
-        }
         if (!Pattern.matches("^[a-z0-9]*$",username)) {
             throw new IllegalArgumentException("아이디는 알파벳 소문자(a~z), 숫자(0~9)로 해주세요.");
         }
         // 비밀번호 입력 제한 확인
-        if (requestDto.getPassword().length() < 8 || username.length() > 15) {
-            throw new IllegalArgumentException("비밀번호는 최소 8자 이상, 15자 이하로 해주세요.");
-        }
         if (!Pattern.matches("^[a-zA-Z0-9]*$",requestDto.getPassword())) {
             throw new IllegalArgumentException("비밀번호는 알파벳 대소문자(a~z, A~Z), 숫자(0~9)로 해주세요.");
         }
