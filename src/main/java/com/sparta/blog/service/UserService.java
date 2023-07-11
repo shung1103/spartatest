@@ -1,12 +1,9 @@
 package com.sparta.blog.service;
 
-import com.sparta.blog.dto.LoginRequestDto;
 import com.sparta.blog.dto.SignupRequestDto;
 import com.sparta.blog.entity.User;
 import com.sparta.blog.entity.UserRoleEnum;
-import com.sparta.blog.jwt.JwtUtil;
 import com.sparta.blog.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +16,6 @@ import java.util.regex.Pattern;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
 
     // ADMIN_TOKEN
     private final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
